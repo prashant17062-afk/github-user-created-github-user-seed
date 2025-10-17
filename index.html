@@ -1,69 +1,264 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Account Age</title>
+    <title>GitHub Profile Viewer</title>
     <style>
-        body { font-family: sans-serif; }
-        #github-status { margin-top: 10px; }
-        footer { margin-top: 20px; font-size: small; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #0056b3;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid #ccd0d5;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 12px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s ease;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #github-status {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            font-style: italic;
+            color: #2196f3;
+            min-height: 20px; /* Ensure space for status messages */
+        }
+        #github-status.error {
+            background-color: #ffebee;
+            border-color: #ef9a9a;
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        #github-profile-data {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background-color: #fdfdfd;
+        }
+        #github-profile-data h2 {
+            text-align: left;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #3f51b5;
+        }
+        #github-profile-data p {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+        #github-profile-data p strong {
+            min-width: 120px;
+            color: #555;
+            font-weight: 600;
+        }
+        #github-profile-data p a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        #github-profile-data p a:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            margin-top: auto; /* Pushes footer to the bottom */
+            padding: 20px;
+            font-size: 0.8em;
+            color: #777;
+            text-align: center;
+            border-top: 1px solid #eee;
+            background-color: #fff;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+        }
     </style>
 </head>
 <body>
-    <h1>GitHub Account Age</h1>
-    <label for="github-username">GitHub Username:</label>
-    <input type="text" id="github-username" value="">
-    <button id="lookup-button">Lookup</button>
-    <div id="github-status" aria-live="polite"></div>
-    <div id="github-account-age"></div>
+    <div class="container">
+        <h1>GitHub Profile Viewer</h1>
+        <p>Enter a GitHub username below to retrieve and display their public profile information.</p>
+
+        <div class="input-group">
+            <input type="text" id="github-username" placeholder="e.g., octocat">
+            <button id="fetch-github-data">Fetch Data</button>
+        </div>
+
+        <div id="github-status" role="status" aria-live="polite">Please enter a username to begin.</div>
+
+        <div id="github-profile-data">
+            <h2>User Profile Details</h2>
+            <p><strong>Name:</strong> <span id="profile-name">N/A</span></p>
+            <p><strong>Username:</strong> <span id="profile-username">N/A</span></p>
+            <p><strong>Public Repos:</strong> <span id="profile-repos">N/A</span></p>
+            <p><strong>Followers:</strong> <span id="profile-followers">N/A</span></p>
+            <p><strong>Account Age:</strong> <span id="github-account-age">N/A</span></p>
+            <p><strong>Bio:</strong> <span id="profile-bio">N/A</span></p>
+            <p><strong>Profile URL:</strong> <a id="profile-url" href="#" target="_blank">N/A</a></p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>This application is provided under the MIT License.</p>
+        <p>Copyright &copy; 2023 [Your Name/Organization Here]. All rights reserved.</p>
+    </div>
 
     <script>
-        const usernameInput = document.getElementById('github-username');
-        const lookupButton = document.getElementById('lookup-button');
-        const statusDiv = document.getElementById('github-status');
-        const ageDiv = document.getElementById('github-account-age');
+        document.addEventListener('DOMContentLoaded', () => {
+            const usernameInput = document.getElementById('github-username');
+            const fetchButton = document.getElementById('fetch-github-data');
+            const githubStatus = document.getElementById('github-status');
+            const profileName = document.getElementById('profile-name');
+            const profileUsername = document.getElementById('profile-username');
+            const profileRepos = document.getElementById('profile-repos');
+            const profileFollowers = document.getElementById('profile-followers');
+            const githubAccountAge = document.getElementById('github-account-age');
+            const profileBio = document.getElementById('profile-bio');
+            const profileUrl = document.getElementById('profile-url');
 
-        const lastGithubUser = localStorage.getItem('lastGithubUser');
-        if (lastGithubUser) {
-            usernameInput.value = lastGithubUser;
-            lookupAccountAge(lastGithubUser);
-        }
+            /**
+             * Resets all profile data display fields to 'N/A'.
+             */
+            const resetProfileDisplay = () => {
+                profileName.textContent = 'N/A';
+                profileUsername.textContent = 'N/A';
+                profileRepos.textContent = 'N/A';
+                profileFollowers.textContent = 'N/A';
+                githubAccountAge.textContent = 'N/A';
+                profileBio.textContent = 'N/A';
+                profileUrl.textContent = 'N/A';
+                profileUrl.href = '#';
+            };
 
-        lookupButton.addEventListener('click', () => {
-            const username = usernameInput.value;
-            if (username) {
-                lookupAccountAge(username);
+            // Attempt to pre-fill the username input from localStorage on page load.
+            const lastUser = localStorage.getItem('lastGithubUser');
+            if (lastUser) {
+                usernameInput.value = lastUser;
+                githubStatus.textContent = `Last successful lookup: ${lastUser}. Click 'Fetch Data' to view again.`;
             }
-        });
 
-        async function lookupAccountAge(username) {
-            statusDiv.textContent = 'Loading...';
-            try {
-                const response = await fetch(`https://api.github.com/users/${username}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+            /**
+             * Fetches GitHub user data from the API and updates the UI.
+             * @param {string} username The GitHub username to fetch.
+             */
+            const fetchGitHubData = async (username) => {
+                if (!username) {
+                    githubStatus.textContent = 'Please enter a GitHub username.';
+                    githubStatus.classList.add('error');
+                    resetProfileDisplay();
+                    return;
                 }
-                const data = await response.json();
-                const createdAt = new Date(data.created_at);
-                const now = new Date();
-                const ageInYears = now.getFullYear() - createdAt.getFullYear();
 
-                ageDiv.textContent = `Account Age: ${ageInYears} years`;
-                statusDiv.textContent = 'Loaded.';
-                localStorage.setItem('lastGithubUser', username);
+                githubStatus.textContent = `Loading data for ${username}...`;
+                githubStatus.classList.remove('error'); // Clear any previous error styling
+                resetProfileDisplay(); // Clear existing profile data before loading new
 
-            } catch (error) {
-                statusDiv.textContent = `Error: ${error.message}`;
-                ageDiv.textContent = '';
-            }
-        }
+                try {
+                    const response = await fetch(`https://api.github.com/users/${username}`);
+
+                    if (!response.ok) {
+                        // Handle specific HTTP error codes
+                        if (response.status === 404) {
+                            throw new Error(`GitHub user '${username}' not found.`);
+                        } else {
+                            throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+                        }
+                    }
+
+                    const data = await response.json();
+
+                    // Update UI with fetched data
+                    profileName.textContent = data.name || 'Not provided';
+                    profileUsername.textContent = data.login;
+                    profileRepos.textContent = data.public_repos || 0;
+                    profileFollowers.textContent = data.followers || 0;
+                    profileBio.textContent = data.bio || 'No public bio available.';
+                    profileUrl.textContent = data.html_url;
+                    profileUrl.href = data.html_url;
+
+                    // Calculate account age in whole years
+                    if (data.created_at) {
+                        const createdAtDate = new Date(data.created_at);
+                        const now = new Date();
+                        let years = now.getFullYear() - createdAtDate.getFullYear();
+
+                        // Adjust years if the current date hasn't reached the creation month/day yet
+                        if (now.getMonth() < createdAtDate.getMonth() ||
+                           (now.getMonth() === createdAtDate.getMonth() && now.getDate() < createdAtDate.getDate())) {
+                            years--;
+                        }
+                        githubAccountAge.textContent = `${Math.max(0, years)} years`; // Ensure age isn't negative
+                    } else {
+                        githubAccountAge.textContent = 'N/A';
+                    }
+
+                    githubStatus.textContent = `Data loaded successfully for ${username}.`;
+
+                    // Cache the username of the last successful lookup in localStorage
+                    localStorage.setItem('lastGithubUser', username);
+
+                } catch (error) {
+                    githubStatus.textContent = `Error: ${error.message}`;
+                    githubStatus.classList.add('error');
+                    resetProfileDisplay(); // Ensure profile display is cleared on error
+                }
+            };
+
+            // Event listener for the "Fetch Data" button click
+            fetchButton.addEventListener('click', () => {
+                fetchGitHubData(usernameInput.value.trim());
+            });
+
+            // Event listener to allow pressing Enter key in the input field
+            usernameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    fetchGitHubData(usernameInput.value.trim());
+                }
+            });
+        });
     </script>
-
-    <footer>
-        &copy; 2023. MIT License.
-    </footer>
 </body>
 </html>
-```
