@@ -1,17 +1,21 @@
-# GitHub User Info
+```
+# GitHub Account Age Lookup
 
-A simple web application to fetch and display GitHub account creation date.
+A simple web application to lookup the age of a GitHub account in years.
 
 ## Setup
 
-1.  Open `index.html` in your browser.
+No setup required. Just open the `index.html` file in your browser.
 
 ## Usage
 
 1.  Enter a GitHub username in the input field.
-2.  Click the "Get Info" button.
-3.  The account creation date will be displayed below the button.
+2.  Click the "Lookup" button.
+3.  The account age will be displayed below.
+
+The last successful lookup is cached in localStorage for convenience.
 
 ## License
 
-MIT
+MIT License
+```
